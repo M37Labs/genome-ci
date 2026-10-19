@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M37 Delivery Protocol</title>
+<meta name="description" content="How a change travels from a laptop to production at M37 Labs: branching rules, blocking gates, AI review agents, one sealed build, and three rollout modes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="hud" aria-label="Progress">
+  <div class="hud-mark"><svg viewBox="0 0 22 16" aria-hidden="true"><defs><linearGradient id="m37-mark" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FE01D0"/><stop offset=".5" stop-color="#8426FF"/><stop offset="1" stop-color="#47F0FF"/></linearGradient></defs><path fill="url(#m37-mark)" d="M0 4h4V0h3v4h3V0h3v4h3V0h3v4h3v12h-6V8h-3v8H8V8H5v8H0z"/></svg>M37<span>/</span>protocol</div>
+  <div class="hud-ticks" aria-hidden="true"></div>
+  <div class="hud-now" aria-live="polite"><b>Standby</b> scroll to begin</div>
+</header>
+
+<main>
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="shell hero-inner">
+    <div class="hero-eyebrow glass"><b>M37 Labs</b> Delivery protocol · rev 2</div>
+    <h1>
+      <span class="line"><span class="grad">Every change</span></span>
+      <span class="line"><span class="spectrum">is a specimen.</span></span>
+    </h1>
+    <p class="hero-lede">At M37 Labs a change is <strong>sealed once</strong>, <strong>proven in the open</strong> and <strong>released by degrees</strong>.</p>
+    <div class="hero-tube glass" aria-hidden="true"><div class="hero-capsule"></div></div>
+    <div class="hero-cue">
+      <svg viewBox="0 0 16 26" aria-hidden="true"><rect x="1" y="1" width="14" height="24" rx="7" fill="none" stroke="currentColor" stroke-width="1.3"/><circle class="cue-dot" cx="8" cy="8" r="2.2" fill="currentColor"/></svg>
+      Scroll to send it through the protocol
+    </div>
+  </div>
+</section>
+
+<div class="shell">
+  <div class="laws glass">
+    <div><h3>Build once, promote it</h3><p>Every environment installs the same sealed specimen, checked by its fingerprint.</p></div>
+    <div><h3>Gates decide, agents advise</h3><p>AI agents read every change. Only deterministic gates can block it.</p></div>
+    <div><h3>No stored keys</h3><p>The pipeline borrows short-lived identity. Runtime secrets never leave the host.</p></div>
+    <div><h3>Every outcome explained</h3><p>Pass or fail, ECHO says which stage broke, why, and what is live now.</p></div>
+  </div>
+</div>
+
+<!-- ================= GENOME ================= -->
+<section class="genome shell" id="genome">
+  <div class="chapter">
+    <div class="chapter-code">M37-00</div>
+    <div>
+      <h2 class="grad">Genome</h2>
+      <p>How branches are born, where they may merge and how long they may live. GitFlow, with one extra rule for side branches. A branch that breaks these rules never reaches the airlock.</p>
+    </div>
+  </div>
+
+  <div class="flow-panel glass">
+  <div class="flow-wrap">
+    <figure class="flow" style="margin:0">
+      <svg viewBox="0 0 1240 430" role="img" aria-label="GitFlow timeline. develop branches from main. A feature branch is cut from develop, a side branch is cut from the feature and merges back into it, and the feature squashes into develop. A release branch is cut from develop, merges to main as v1.1.0 and back into develop. A hotfix is cut from main, merges to main as v1.1.1 and back into develop. A second feature merges into develop later.">
+        <g class="lanes">
+          <line class="lane-rule" x1="110" y1="50" x2="1100" y2="50"/>
+          <line class="lane-rule" x1="110" y1="115" x2="1100" y2="115"/>
+          <line class="lane-rule" x1="110" y1="180" x2="1100" y2="180"/>
+          <line class="lane-rule" x1="110" y1="245" x2="1100" y2="245"/>
+          <line class="lane-rule" x1="110" y1="310" x2="1100" y2="310"/>
+          <line class="lane-rule" x1="110" y1="375" x2="1100" y2="375"/>
+          <text class="lane-label" x="0" y="54" style="fill:var(--b-main)">main</text>
+          <text class="lane-label" x="0" y="119" style="fill:var(--b-hotfix)">hotfix/*</text>
+          <text class="lane-label" x="0" y="184" style="fill:var(--b-release)">release/*</text>
+          <text class="lane-label" x="0" y="249" style="fill:var(--b-develop)">develop</text>
+          <text class="lane-label" x="0" y="314" style="fill:var(--b-feature)">feature/*</text>
+          <text class="lane-label" x="0" y="379" style="fill:var(--b-side)">side/*</text>
+        </g>
+
+        <line class="playhead" x1="110" y1="14" x2="110" y2="400" stroke="var(--specimen)" stroke-width="1.2" stroke-dasharray="2 4" opacity=".7"/>
+
+        <!-- branches: data-x0/x1 drive the playhead timing -->
+        <path class="br br-main" data-x0="110" data-x1="1100" d="M110 50 H1100"/>
+        <path class="br br-develop" data-x0="130" data-x1="1100" d="M130 50 C160 50 160 245 190 245 H1100"/>
+        <path class="br br-feature" data-x0="220" data-x1="450" d="M220 245 C245 245 245 310 270 310 H400 C425 310 425 245 450 245"/>
+        <path class="br br-side" data-x0="295" data-x1="390" d="M295 310 C315 310 315 375 335 375 H350 C370 375 370 310 390 310"/>
+        <path class="br br-release" data-x0="490" data-x1="650" d="M490 245 C515 245 515 180 540 180 H600 C625 180 625 50 650 50"/>
+        <path class="br br-release" data-x0="610" data-x1="665" d="M610 180 C635 180 640 245 665 245"/>
+        <path class="br br-feature" data-x0="700" data-x1="980" d="M700 245 C725 245 725 310 750 310 H930 C955 310 955 245 980 245"/>
+        <path class="br br-hotfix" data-x0="720" data-x1="840" d="M720 50 C745 50 745 115 770 115 H790 C815 115 815 50 840 50"/>
+        <path class="br br-hotfix" data-x0="800" data-x1="855" d="M800 115 C825 115 830 245 855 245"/>
+
+        <!-- commits -->
+        <g class="dots">
+          <circle class="dot" cx="130" cy="50"  r="0" data-x="130" style="fill:var(--b-main)"/>
+          <circle class="dot" cx="650" cy="50"  r="0" data-x="650" style="fill:var(--b-main)"/>
+          <circle class="dot" cx="840" cy="50"  r="0" data-x="840" style="fill:var(--b-main)"/>
+          <circle class="dot" cx="210" cy="245" r="0" data-x="210" style="fill:var(--b-develop)"/>
+          <circle class="dot" cx="450" cy="245" r="0" data-x="450" style="fill:var(--b-develop)"/>
+          <circle class="dot" cx="665" cy="245" r="0" data-x="665" style="fill:var(--b-develop)"/>
+          <circle class="dot" cx="855" cy="245" r="0" data-x="855" style="fill:var(--b-develop)"/>
+          <circle class="dot" cx="980" cy="245" r="0" data-x="980" style="fill:var(--b-develop)"/>
+          <circle class="dot" cx="1060" cy="245" r="0" data-x="1060" style="fill:var(--b-develop)"/>
+          <circle class="dot" cx="285" cy="310" r="0" data-x="285" style="fill:var(--b-feature)"/>
+          <circle class="dot" cx="390" cy="310" r="0" data-x="390" style="fill:var(--b-feature)"/>
+          <circle class="dot" cx="340" cy="375" r="0" data-x="340" style="fill:var(--b-side)"/>
+          <circle class="dot" cx="545" cy="180" r="0" data-x="545" style="fill:var(--b-release)"/>
+          <circle class="dot" cx="590" cy="180" r="0" data-x="590" style="fill:var(--b-release)"/>
+          <circle class="dot" cx="780" cy="115" r="0" data-x="780" style="fill:var(--b-hotfix)"/>
+          <circle class="dot" cx="775" cy="310" r="0" data-x="775" style="fill:var(--b-feature)"/>
+          <circle class="dot" cx="880" cy="310" r="0" data-x="880" style="fill:var(--b-feature)"/>
+        </g>
+
+        <!-- tags -->
+        <g class="tagg" data-x="130" opacity="0"><rect class="tag-bg" x="103" y="10" width="54" height="20" rx="4"/><text class="tag-t" x="130" y="24" text-anchor="middle">v1.0.0</text></g>
+        <g class="tagg" data-x="650" opacity="0"><rect class="tag-bg" x="623" y="10" width="54" height="20" rx="4"/><text class="tag-t" x="650" y="24" text-anchor="middle">v1.1.0</text></g>
+        <g class="tagg" data-x="840" opacity="0"><rect class="tag-bg" x="813" y="10" width="54" height="20" rx="4"/><text class="tag-t" x="840" y="24" text-anchor="middle">v1.1.1</text></g>
+
+        <!-- notes -->
+        <g class="notes">
+          <text class="note" x="386" y="402" data-x="390" opacity="0">side branch returns to its feature, never to develop</text>
+          <text class="note" x="466" y="338" data-x="450" opacity="0">one ticket, five days at most, squash</text>
+          <text class="note" x="530" y="166" data-x="545" text-anchor="end" opacity="0">freeze: fixes only</text>
+          <text class="note" x="878" y="120" data-x="855" opacity="0">one fix, merged back to develop</text>
+          <text class="note" x="1108" y="54" data-x="1090" opacity="0">to IGNITION</text>
+          <text class="note" x="1108" y="249" data-x="1090" opacity="0">to PROVING GROUND</text>
+        </g>
+      </svg>
+    </figure>
+  </div>
+  <p class="flow-hint">Swipe the diagram sideways to see the whole timeline.</p>
+  </div>
+
+  <div class="branch-rules">
+    <article class="br-rule glass">
+      <svg class="br-swatch" viewBox="0 0 56 8" aria-hidden="true"><path class="br br-main" d="M3 4 H53"/></svg>
+      <h3>main <code>main</code></h3>
+      <p class="what">What runs in production, and nothing else.</p>
+      <dl><dt>Cut from</dt><dd>Never cut; receives only</dd><dt>Merges in</dt><dd>release/* and hotfix/*</dd><dt>Lives</dt><dd>Forever</dd></dl>
+      <ul><li>No direct pushes, no force pushes</li><li>Every merge is tagged and signed</li><li>Deployable at every commit</li></ul>
+    </article>
+    <article class="br-rule glass">
+      <svg class="br-swatch" viewBox="0 0 56 8" aria-hidden="true"><path class="br br-develop" d="M3 4 H53"/></svg>
+      <h3>develop <code>develop</code></h3>
+      <p class="what">Where finished features meet each other.</p>
+      <dl><dt>Cut from</dt><dd>main, once</dd><dt>Merges in</dt><dd>feature/*, plus back-merges from release and hotfix</dd><dt>Lives</dt><dd>Forever</dd></dl>
+      <ul><li>Stays green; a red develop stops all merges</li><li>Every merge deploys to PROVING GROUND</li><li>Rescanned nightly for new advisories</li></ul>
+    </article>
+    <article class="br-rule glass">
+      <svg class="br-swatch" viewBox="0 0 56 8" aria-hidden="true"><path class="br br-feature" d="M3 4 H53"/></svg>
+      <h3>Feature <code>feature/&lt;TICKET&gt;-slug</code></h3>
+      <p class="what">One ticket's worth of work.</p>
+      <dl><dt>Cut from</dt><dd>develop</dd><dt>Merges into</dt><dd>develop, by squash, through the airlock</dd><dt>Lives</dt><dd>Five working days at most</dd></dl>
+      <ul><li>Rebase on develop daily</li><li>Unfinished work ships dark behind a flag</li><li>Deleted on merge</li></ul>
+    </article>
+    <article class="br-rule glass">
+      <svg class="br-swatch" viewBox="0 0 56 8" aria-hidden="true"><path class="br br-side" d="M3 4 H53"/></svg>
+      <h3>Side <code>side/&lt;feature&gt;/topic</code></h3>
+      <p class="what">A spike, an experiment or pair work that hangs off one feature.</p>
+      <dl><dt>Cut from</dt><dd>A feature branch only</dd><dt>Merges into</dt><dd>Its parent feature, never develop or main</dd><dt>Lives</dt><dd>Two days, and never longer than its parent</dd></dl>
+      <ul><li>Never deployed anywhere</li><li>If the spike becomes real work, re-cut it as a feature</li><li>Dies with its parent</li></ul>
+    </article>
+    <article class="br-rule glass">
+      <svg class="br-swatch" viewBox="0 0 56 8" aria-hidden="true"><path class="br br-release" d="M3 4 H53"/></svg>
+      <h3>Release <code>release/x.y</code></h3>
+      <p class="what">A frozen candidate, getting ready to go out.</p>
+      <dl><dt>Cut from</dt><dd>develop, when scope freezes</dd><dt>Merges into</dt><dd>main (tag x.y.0) and back into develop</dd><dt>Lives</dt><dd>Days, not weeks</dd></dl>
+      <ul><li>Fixes, version bump and changelog only</li><li>Runs as a release candidate on PROVING GROUND</li><li>No new features, ever</li></ul>
+    </article>
+    <article class="br-rule glass">
+      <svg class="br-swatch" viewBox="0 0 56 8" aria-hidden="true"><path class="br br-hotfix" d="M3 4 H53"/></svg>
+      <h3>Hotfix <code>hotfix/x.y.z</code></h3>
+      <p class="what">One urgent fix to what is live.</p>
+      <dl><dt>Cut from</dt><dd>The live tag on main</dd><dt>Merges into</dt><dd>main (patch tag), develop and any open release</dd><dt>Lives</dt><dd>Hours</dd></dl>
+      <ul><li>Passes the same gates; urgency skips nothing</li><li>One fix per branch</li><li>A missing back-merge is a future regression</li></ul>
+    </article>
+  </div>
+
+  <div class="landing glass">
+    <div style="--c:var(--b-feature)"><b>feature/*</b><span>A preview environment, removed on merge</span></div>
+    <div style="--c:var(--b-develop)"><b>develop</b><span>PROVING GROUND, on every merge</span></div>
+    <div style="--c:var(--b-release)"><b>release/*</b><span>Release candidate on PROVING GROUND</span></div>
+    <div style="--c:var(--b-main)"><b>main + tag</b><span>IGNITION, then a rollout mode</span></div>
+  </div>
+</section>
+
+<!-- ================= PIPELINE ================= -->
+<div class="shell">
+  <div class="chapter">
+    <div class="chapter-code">M37-01 to 09</div>
+    <div>
+      <h2 class="grad">The protocol</h2>
+      <p>Nine chambers. The specimen moves on only when the chamber it is in passes. The dotted line beside the tube is ECHO: every chamber reports its outcome to it.</p>
+    </div>
+  </div>
+</div>
+
+<section class="pipeline shell" id="pipeline">
+  <div class="rail" aria-hidden="true"><svg></svg></div>
+
+  <article class="stage glass" data-code="M37-01" data-name="Bench">
+    <div class="stage-head"><span class="stage-code">M37-01</span><span class="stage-where">your machine</span></div>
+    <h3 class="grad">Bench</h3>
+    <p class="stage-line">Hooks that catch problems before they leave your laptop.</p>
+    <ul class="steps">
+      <li><span class="tick"><i></i></span><span><b>Format and lint</b> run on the files you are committing.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Secret sniff</b> checks every commit for keys and tokens.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Branch name</b> is checked against Genome before the first push.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Pre-push</b> runs the same CI script the server runs, so CI is never the first to know.</span></li>
+    </ul>
+    <div class="watch"><b>Watch</b><span>Hooks can be skipped with a flag. Bench is a convenience; the airlock is the rule.</span></div>
+  </article>
+
+  <article class="stage glass" data-code="M37-02" data-name="Airlock" data-kind="airlock">
+    <div class="stage-head"><span class="stage-code">M37-02</span><span class="stage-where">pull request</span></div>
+    <h3 class="grad">Airlock</h3>
+    <p class="stage-line">Four blocking gates run in parallel. If any one fails, the door stays shut.</p>
+    <div class="gates">
+      <div class="gate"><h4>Quality <em>Passed</em></h4><p>Lint, types, tests, a coverage floor, and a migration linter.</p><div class="door"><span><svg viewBox="0 0 11 13" aria-hidden="true"><rect x="0.5" y="5.5" width="10" height="7" rx="1.6" fill="currentColor"/><path d="M2.6 5.5V3.9a2.9 2.9 0 0 1 5.8 0v1.6" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>Sealed</span></div></div>
+      <div class="gate"><h4>Supply chain <em>Passed</em></h4><p>Known vulnerabilities with a fix, a licence allow-list, and new packages flagged.</p><div class="door"><span><svg viewBox="0 0 11 13" aria-hidden="true"><rect x="0.5" y="5.5" width="10" height="7" rx="1.6" fill="currentColor"/><path d="M2.6 5.5V3.9a2.9 2.9 0 0 1 5.8 0v1.6" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>Sealed</span></div></div>
+      <div class="gate"><h4>Secrets and code <em>Passed</em></h4><p>Every commit in the PR scanned, plus static analysis for injection and unsafe calls.</p><div class="door"><span><svg viewBox="0 0 11 13" aria-hidden="true"><rect x="0.5" y="5.5" width="10" height="7" rx="1.6" fill="currentColor"/><path d="M2.6 5.5V3.9a2.9 2.9 0 0 1 5.8 0v1.6" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>Sealed</span></div></div>
+      <div class="gate"><h4>Traceability <em>Passed</em></h4><p>A ticket key in the title, and a branch that targets the base its type allows.</p><div class="door"><span><svg viewBox="0 0 11 13" aria-hidden="true"><rect x="0.5" y="5.5" width="10" height="7" rx="1.6" fill="currentColor"/><path d="M2.6 5.5V3.9a2.9 2.9 0 0 1 5.8 0v1.6" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>Sealed</span></div></div>
+    </div>
+    <div class="watch"><b>Watch</b><span>A secret deleted in a later commit is still in the PR. Scan the whole range, not the final diff.</span></div>
+  </article>
+
+  <article class="stage glass" data-code="M37-03" data-name="Swarm" data-kind="swarm">
+    <div class="stage-head"><span class="stage-code">M37-03</span><span class="stage-where">agent review, alongside the airlock</span></div>
+    <h3 class="grad">Swarm</h3>
+    <p class="stage-line">A team of AI agents reads the change the way a careful senior reviewer would.</p>
+    <div class="agents">
+      <div class="agent"><span class="agent-eye"><i></i></span><div><h4>Smell Hunter</h4><p>Flags long functions, duplication, dead code and complexity spikes in the diff.</p></div></div>
+      <div class="agent"><span class="agent-eye"><i></i></span><div><h4>Dependency Warden</h4><p>Reads the lockfile diff for CVEs, typosquats, install scripts, licence drift and very new releases.</p></div></div>
+      <div class="agent"><span class="agent-eye"><i></i></span><div><h4>Secret Hound</h4><p>Walks every commit, config file and fixture for anything that looks like a credential.</p></div></div>
+      <div class="agent"><span class="agent-eye"><i></i></span><div><h4>Test Critic</h4><p>Finds changed lines that no test runs and proposes the missing cases.</p></div></div>
+      <div class="agent"><span class="agent-eye"><i></i></span><div><h4>Schema Auditor</h4><p>Reads migrations for destructive, locking or irreversible operations.</p></div></div>
+      <div class="agent"><span class="agent-eye"><i></i></span><div><h4>Pipeline Inspector</h4><p>Reviews CI changes for injected input, unpinned actions and broad permissions.</p></div></div>
+      <div class="agent"><span class="agent-eye"><i></i></span><div><h4>Scribe</h4><p>Writes the changelog entry and, when something fails, the plain-language reason.</p></div></div>
+    </div>
+    <p class="verdict"><b>Agents advise. Gates decide.</b> Agents comment and triage. They run read-only, hold no secrets, and cannot approve, merge or push.</p>
+    <div class="watch"><b>Watch</b><span>Treat PR text as untrusted input. A description can carry instructions aimed at the agents.</span></div>
+  </article>
+
+  <article class="stage glass" data-code="M37-04" data-name="Concord">
+    <div class="stage-head"><span class="stage-code">M37-04</span><span class="stage-where">review and merge</span></div>
+    <h3 class="grad">Concord</h3>
+    <p class="stage-line">People sign off. A ruleset enforces who must sign and how the merge happens.</p>
+    <ul class="steps">
+      <li><span class="tick"><i></i></span><span><b>Code owners</b> must review lockfiles, CI config and infrastructure.</span></li>
+      <li><span class="tick"><i></i></span><span><b>One approval</b> from someone other than the author.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Up to date</b> with its target, and every required gate green on the latest commit.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Squash into develop</b>; merge commits into main, so release history stays readable.</span></li>
+    </ul>
+    <div class="watch"><b>Watch</b><span>Approvals go stale. A push after approval needs a fresh review.</span></div>
+  </article>
+
+  <article class="stage glass" data-code="M37-05" data-name="Crucible">
+    <div class="stage-head"><span class="stage-code">M37-05</span><span class="stage-where">build, once</span></div>
+    <h3 class="grad">Crucible</h3>
+    <p class="stage-line">One artifact is built from the merge commit. Every environment gets this exact one.</p>
+    <ul class="steps">
+      <li><span class="tick"><i></i></span><span><b>Clean build</b> on a fresh runner, from the merge commit only.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Locked installs</b>: every dependency checked against its lockfile hash, install scripts off.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Version stamped</b> into the artifact, so it can always say what it is.</span></li>
+      <li><span class="tick"><i></i></span><span><b>No environment config</b> baked in; settings arrive at install time.</span></li>
+    </ul>
+    <div class="watch"><b>Watch</b><span>If staging and production build separately, staging proved nothing about production.</span></div>
+  </article>
+
+  <article class="stage glass" data-code="M37-06" data-name="Sigil" data-kind="sigil">
+    <div class="stage-head"><span class="stage-code">M37-06</span><span class="stage-where">seal</span></div>
+    <h3 class="grad">Sigil</h3>
+    <p class="stage-line">The specimen gets a fingerprint, a parts list and a signature.</p>
+    <div class="sigil" aria-label="Example seal record">
+      <div class="sigil-row"><span>Fingerprint</span><span class="hash" data-real="9f3c1ab47e0d52c8a1f6b39e7d24c0a85b1e6f73d29a4c08e5b7f1d36a92c4e1"></span></div>
+      <div class="sigil-row"><span>Parts list</span><span>Software bill of materials, every package and version</span></div>
+      <div class="sigil-row"><span>Provenance</span><span>Which commit, which run, which builder</span></div>
+      <div class="sigil-row"><span>Path guard</span><span>No env files, keys or real data inside</span></div>
+    </div>
+    <div class="watch"><b>Watch</b><span>A fingerprint only helps if every install checks it. Verify before you unpack.</span></div>
+  </article>
+
+  <article class="stage glass" data-code="M37-07" data-name="Vault">
+    <div class="stage-head"><span class="stage-code">M37-07</span><span class="stage-where">artifact store</span></div>
+    <h3 class="grad">Vault</h3>
+    <p class="stage-line">Immutable and versioned, addressed by commit. Nothing is ever overwritten.</p>
+    <ul class="steps">
+      <li><span class="tick"><i></i></span><span><b>Write once</b>: a specimen, its fingerprint and parts list, stored under its commit.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Short-lived links</b>: hosts pull with a link that expires in minutes.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Pull, never push</b>: CI asks a host to fetch; it never opens a shell on one.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Lifecycle rules</b> keep recent releases and expire the rest.</span></li>
+    </ul>
+    <div class="watch"><b>Watch</b><span>Keep at least the last few releases. Recall needs something to go back to.</span></div>
+  </article>
+
+  <article class="stage glass" data-code="M37-08" data-name="Proving Ground">
+    <div class="stage-head"><span class="stage-code">M37-08</span><span class="stage-where">staging</span></div>
+    <h3 class="grad">Proving Ground</h3>
+    <p class="stage-line">The sealed specimen is installed on a production-shaped environment and smoke-tested hard.</p>
+    <ul class="steps">
+      <li><span class="tick"><i></i></span><span><b>Verify</b> the fingerprint, then take the deploy lock.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Back up, then migrate</b>, adding to the schema only.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Switch and restart</b>, letting workers finish their current jobs.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Health check</b> must report the new version, not just a 200.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Smoke test</b>: sign-in, one write, one background job round-trip.</span></li>
+      <li class="fail-path"><span class="tick"><i></i></span><span><b>Any failure</b> triggers RECALL to the previous release, and ECHO says why.</span></li>
+    </ul>
+    <div class="watch"><b>Watch</b><span>Rolling back code does not roll back the schema. Migrations must keep the old release working.</span></div>
+  </article>
+
+  <article class="stage glass" data-code="M37-09" data-name="Ignition">
+    <div class="stage-head"><span class="stage-code">M37-09</span><span class="stage-where">release</span></div>
+    <h3 class="grad">Ignition</h3>
+    <p class="stage-line">A release manager signs the tag. The specimen that passed the proving ground is promoted unchanged.</p>
+    <ul class="steps">
+      <li><span class="tick"><i></i></span><span><b>Release candidate</b> has soaked on the proving ground.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Signed tag</b> on main, pushed by a role the ruleset allows.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Window and on-call</b> confirmed, with no other change in flight.</span></li>
+      <li><span class="tick"><i></i></span><span><b>Rollout mode</b> chosen: Kestrel, Twin Suns or Tide.</span></li>
+    </ul>
+    <div class="watch"><b>Watch</b><span>Never rebuild for production. If the fingerprint differs from staging, stop.</span></div>
+  </article>
+</section>
+
+<!-- ================= ROLLOUT ================= -->
+<section class="rollout shell" id="rollout">
+  <div class="chapter">
+    <div class="chapter-code">M37-10</div>
+    <div>
+      <h2 class="grad">Three ways to light it</h2>
+      <p>Ignition hands the sealed specimen to one of three rollout modes. Each one is watched by Black Box and can be reversed by Recall with nobody at the keyboard.</p>
+    </div>
+  </div>
+
+  <!-- KESTREL -->
+  <div class="mode" data-mode="kestrel" data-hud="Kestrel">
+    <div class="mode-text">
+      <h3 class="grad">Kestrel</h3>
+      <div class="aka">canary release</div>
+      <p class="line">One new instance takes a small slice of real traffic. It is compared with the old fleet over the same minutes, and then promoted or recalled.</p>
+      <ul>
+        <li>Compare the canary with the baseline right now, not with yesterday.</li>
+        <li>No verdict until it has seen a minimum number of requests.</li>
+        <li>Error rate or latency over the line recalls it automatically.</li>
+      </ul>
+      <p class="best">Best for services with steady traffic and real users to learn from.</p>
+    </div>
+    <div class="stagebox glass">
+      <div class="readout"><div class="pct grad"><span data-out="pct">0</span><small>%</small></div><div class="phase" data-out="phase">waiting for ignition</div></div>
+      <svg viewBox="0 0 520 380" aria-hidden="true">
+        <g class="k-links"></g>
+        <circle cx="60" cy="150" r="30" fill="var(--paper-2)" stroke="var(--rule-strong)"/>
+        <text class="sv-label" x="60" y="154" text-anchor="middle">router</text>
+        <g class="k-insts"></g>
+        <g transform="translate(20 300)">
+          <text class="sv-label" x="0" y="0">error rate</text>
+          <text class="sv-text" x="0" y="26">baseline</text>
+          <rect x="80" y="15" width="380" height="14" rx="7" fill="var(--paper-2)"/>
+          <rect class="k-base" x="80" y="15" width="0" height="14" rx="7" fill="var(--steel)"/>
+          <text class="sv-text" x="0" y="54">canary</text>
+          <rect x="80" y="43" width="380" height="14" rx="7" fill="var(--paper-2)"/>
+          <rect class="k-can" x="80" y="43" width="0" height="14" rx="7" fill="var(--specimen)"/>
+          <line x1="380" y1="8" x2="380" y2="64" stroke="var(--fail)" stroke-dasharray="3 3"/>
+          <text class="sv-label" x="386" y="6" style="fill:var(--fail)">recall line</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- TWIN SUNS -->
+  <div class="mode" data-mode="twins" data-hud="Twin Suns">
+    <div class="mode-text">
+      <h3 class="grad">Twin Suns</h3>
+      <div class="aka">blue/green deployment</div>
+      <p class="line">The new version runs beside the old one at full size. It is tested privately, then the router moves all traffic in one switch.</p>
+      <ul>
+        <li>Green is warmed and smoke-tested before it sees a single user.</li>
+        <li>Blue stays running, so switching back takes seconds.</li>
+        <li>Both colours share one database, so the schema must serve both.</li>
+      </ul>
+      <p class="best">Best when you need an instant, all-at-once switch and can pay for double capacity.</p>
+    </div>
+    <div class="stagebox glass">
+      <div class="readout"><div class="pct grad"><span data-out="pct">0</span><small>% on green</small></div><div class="phase" data-out="phase">blue is live</div></div>
+      <svg viewBox="0 0 520 340" aria-hidden="true">
+        <path class="link" d="M90 170 C190 170 200 85 290 85"/>
+        <path class="link" d="M90 170 C190 170 200 255 290 255"/>
+        <path class="link flowing t-blue" d="M90 170 C190 170 200 85 290 85" style="stroke:var(--blue);stroke-width:3"/>
+        <path class="link flowing t-green" d="M90 170 C190 170 200 255 290 255" style="stroke:var(--green);stroke-width:3" opacity="0"/>
+        <circle cx="60" cy="170" r="30" fill="var(--paper-2)" stroke="var(--rule-strong)"/>
+        <text class="sv-label" x="60" y="218" text-anchor="middle">router</text>
+        <g class="t-bluestack">
+          <text class="sv-label" x="290" y="28" style="fill:var(--blue)">blue, current version</text>
+          <rect class="inst" x="290" y="40" width="200" height="26" rx="6" style="stroke:var(--blue)"/>
+          <rect class="inst" x="290" y="72" width="200" height="26" rx="6" style="stroke:var(--blue)"/>
+          <rect class="inst" x="290" y="104" width="200" height="26" rx="6" style="stroke:var(--blue)"/>
+        </g>
+        <g>
+          <text class="sv-label" x="290" y="198" style="fill:var(--green)">green, new version</text>
+          <rect class="inst t-gblock" x="290" y="210" width="200" height="26" rx="6" style="stroke:var(--green)" opacity=".15"/>
+          <rect class="inst t-gblock" x="290" y="242" width="200" height="26" rx="6" style="stroke:var(--green)" opacity=".15"/>
+          <rect class="inst t-gblock" x="290" y="274" width="200" height="26" rx="6" style="stroke:var(--green)" opacity=".15"/>
+          <g class="t-check" opacity="0"><circle cx="472" cy="223" r="7" fill="var(--green)"/><circle cx="472" cy="255" r="7" fill="var(--green)"/><circle cx="472" cy="287" r="7" fill="var(--green)"/></g>
+        </g>
+        <line class="t-lever" x1="60" y1="170" x2="82" y2="148" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="60" cy="170" r="5" fill="var(--ink)"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- TIDE -->
+  <div class="mode" data-mode="tide" data-hud="Tide">
+    <div class="mode-text">
+      <h3 class="grad">Tide</h3>
+      <div class="aka">progressive, rate-based rollout</div>
+      <p class="line">The share of traffic on the new version rises in steps, 10%, 20%, 50%, then 100%, holding at each step until the numbers say go.</p>
+      <ul>
+        <li>Each step holds for a set time and must pass its health checks.</li>
+        <li>Route by a hash of the user, so each person stays on one version.</li>
+        <li>A failed check drops the tide to 0%, not back one step.</li>
+      </ul>
+      <p class="best">Best for large or risky changes where you want exposure to grow with evidence.</p>
+    </div>
+    <div class="stagebox glass">
+      <div class="readout"><div class="pct grad"><span data-out="pct">0</span><small>% on new</small></div><div class="phase" data-out="phase">all traffic on current</div></div>
+      <svg viewBox="0 0 520 300" aria-hidden="true">
+        <rect x="20" y="40" width="480" height="56" rx="10" fill="var(--paper-2)" stroke="var(--rule-strong)"/>
+        <rect class="tide-fill" x="20" y="40" width="0" height="56" rx="10" fill="var(--specimen)"/>
+        <g class="tide-marks"></g>
+        <g class="tide-holds"></g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="watchtower glass">
+    <div>
+      <h3>Black Box</h3>
+      <p>Records error rate, latency, saturation and one business signal for the new version, side by side with the old.</p>
+      <svg viewBox="0 0 280 56" aria-hidden="true"><line class="spark-limit" x1="0" y1="14" x2="280" y2="14"/><path class="spark-line wt-draw" d="M0 40 L20 38 L40 41 L60 36 L80 39 L100 35 L120 38 L140 34 L160 37 L180 33 L200 36 L220 34 L240 37 L260 35 L280 36"/></svg>
+    </div>
+    <div>
+      <h3>Recall</h3>
+      <p>Reverses a rollout automatically when Black Box sees a signal cross its line, then hands the reason to Echo.</p>
+      <svg viewBox="0 0 280 56" aria-hidden="true"><line class="spark-limit" x1="0" y1="14" x2="280" y2="14"/><path class="spark-line wt-draw" d="M0 40 L30 38 L60 39 L90 36 L110 30 L125 8 L135 6 L150 24 L170 38 L200 40 L230 39 L260 40 L280 39" style="stroke:var(--fail)"/></svg>
+    </div>
+    <div>
+      <h3>Echo</h3>
+      <p>Reports every outcome: the stage, the exact error, a redacted log tail and which version is live now.</p>
+      <svg viewBox="0 0 280 56" aria-hidden="true"><path class="spark-line wt-draw" d="M0 28 H60 M60 28 L80 10 L100 46 L120 10 L140 46 L160 28 H280" style="stroke:var(--blue)"/></svg>
+    </div>
+  </div>
+</section>
+
+<div class="band light">
+<!-- ================= FAULT LINES ================= -->
+<section class="faults shell" id="faults">
+  <div class="chapter">
+    <div class="chapter-code">Caveats</div>
+    <div>
+      <h2 class="grad">Fault lines</h2>
+      <p>Where good pipelines still go wrong. Each of these has caught out a team that thought it was covered.</p>
+    </div>
+  </div>
+  <div class="fault-groups">
+    <div class="fault-group glass"><h3>Branching</h3><ul>
+      <li><b>Long-lived branches rot.</b>Past five days, merge pain grows faster than the feature. Split it, or ship it dark behind a flag.</li>
+      <li><b>Side branches never target develop.</b>A side branch that skips its parent skips the review of the feature it belongs to.</li>
+      <li><b>Hotfixes must flow back.</b>A fix merged to main but not to develop returns as a regression in the next release.</li>
+      <li><b>A release branch is a freeze.</b>Any new feature on release/* restarts the testing clock.</li>
+    </ul></div>
+    <div class="fault-group glass"><h3>Gates and agents</h3><ul>
+      <li><b>Agents can be confidently wrong.</b>They invent findings and miss real ones. Treat them as a second reviewer, never as the gate.</li>
+      <li><b>Scanners only know published problems.</b>A hijacked package has no advisory on day one. The release cooldown and the install-script block are what stop it.</li>
+      <li><b>Flaky tests teach people to retry.</b>Quarantine a flaky test with an owner and an expiry date, or delete it.</li>
+      <li><b>Pin CI actions to a commit.</b>A version tag can be moved to malicious code by whoever controls it.</li>
+      <li><b>A deleted secret is still leaked.</b>It lives on in history and forks. Rotate it first, then clean up.</li>
+    </ul></div>
+    <div class="fault-group glass"><h3>Build and artifact</h3><ul>
+      <li><b>Rebuilding per environment breaks the promise.</b>Two builds from one commit can still differ.</li>
+      <li><b>Config is not part of the artifact.</b>Bake settings in and you need one build per environment again.</li>
+      <li><b>Caches outlive versions.</b>Key caches and static assets by version, or the new code reads the old shape.</li>
+    </ul></div>
+    <div class="fault-group glass"><h3>Data</h3><ul>
+      <li><b>Rollback reverts code, not schema.</b>Expand, then contract: add in one release, remove in a later one.</li>
+      <li><b>Backfills are not migrations.</b>Run them as separate, resumable jobs, so a deploy never waits on a table scan.</li>
+      <li><b>Queued jobs outlive deploys.</b>A job written by the old version may be read by the new one. Keep payloads backward compatible.</li>
+    </ul></div>
+    <div class="fault-group glass"><h3>Rollout</h3><ul>
+      <li><b>A quiet canary proves nothing.</b>Set a minimum request count before any verdict.</li>
+      <li><b>Blue/green doubles more than servers.</b>Caches, connections and the shared database see both colours at once.</li>
+      <li><b>Percentages need sticky routing.</b>Without user-hash routing, a person flips between versions on every click.</li>
+      <li><b>Long connections don't follow the switch.</b>Websockets and streams stay on the old version until drained.</li>
+      <li><b>A 200 after rollback can lie.</b>Health must report which version is answering.</li>
+    </ul></div>
+    <div class="fault-group glass"><h3>Operations</h3><ul>
+      <li><b>Two deploys at once corrupt state.</b>Lock the host, and never cancel a deploy mid-flight.</li>
+      <li><b>Cancelled is not stopped.</b>A cancelled CI job can leave remote commands still running.</li>
+      <li><b>Alert on change, not on every run.</b>A pipeline that emails every green build gets filtered out.</li>
+      <li><b>Flags are debt with interest.</b>Every flag gets an owner and a removal date.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ================= CODEX ================= -->
+<section class="codex shell" id="codex">
+  <div class="chapter">
+    <div class="chapter-code">Glossary</div>
+    <div>
+      <h2 class="grad">Codex</h2>
+      <p>Every name on this page, in one line.</p>
+    </div>
+  </div>
+  <dl>
+    <div class="entry"><dt>Specimen<small>the artifact</small></dt><dd>The one sealed build of a change; it is never rebuilt and never edited.</dd></div>
+    <div class="entry"><dt>Genome<small>M37-00 · branching</small></dt><dd>GitFlow plus side branches: where branches come from, where they go, how long they live.</dd></div>
+    <div class="entry"><dt>Bench<small>M37-01 · local hooks</small></dt><dd>Format, lint and secret checks on your laptop before anything is pushed.</dd></div>
+    <div class="entry"><dt>Airlock<small>M37-02 · PR gates</small></dt><dd>Four parallel gates that block a merge until every one is green.</dd></div>
+    <div class="entry"><dt>Swarm<small>M37-03 · AI review</small></dt><dd>Seven read-only agents that hunt smells, risky packages, secrets and missing tests.</dd></div>
+    <div class="entry"><dt>Concord<small>M37-04 · merge</small></dt><dd>Human approval and a ruleset that decides who may merge, and how.</dd></div>
+    <div class="entry"><dt>Crucible<small>M37-05 · build</small></dt><dd>Builds the specimen once, from the merge commit, with locked dependencies.</dd></div>
+    <div class="entry"><dt>Sigil<small>M37-06 · seal</small></dt><dd>Fingerprint, parts list and provenance, so every install can prove what it got.</dd></div>
+    <div class="entry"><dt>Vault<small>M37-07 · artifact store</small></dt><dd>Write-once storage that hands hosts short-lived download links.</dd></div>
+    <div class="entry"><dt>Proving Ground<small>M37-08 · staging</small></dt><dd>A production-shaped install with a deploy lock, a backup, migrations and smoke tests.</dd></div>
+    <div class="entry"><dt>Ignition<small>M37-09 · release</small></dt><dd>A signed tag that promotes the proven specimen and picks a rollout mode.</dd></div>
+    <div class="entry"><dt>Kestrel<small>M37-10 · canary</small></dt><dd>A small slice of real traffic on one new instance, compared live with the old fleet.</dd></div>
+    <div class="entry"><dt>Twin Suns<small>M37-10 · blue/green</small></dt><dd>A full second environment, tested privately, then switched in one move.</dd></div>
+    <div class="entry"><dt>Tide<small>M37-10 · progressive</small></dt><dd>Traffic share that rises 10%, 20%, 50%, 100%, with a hold and a health check at each step.</dd></div>
+    <div class="entry"><dt>Black Box<small>observability</small></dt><dd>Records the new version's vital signs next to the old version's.</dd></div>
+    <div class="entry"><dt>Recall<small>automatic rollback</small></dt><dd>Puts the previous release back when a signal crosses its line.</dd></div>
+    <div class="entry"><dt>Echo<small>notifications</small></dt><dd>One report per run, with the stage, the error and what is live now.</dd></div>
+  </dl>
+</section>
+</div>
+
+<div class="shell">
+  <footer>
+    <span>M37 Labs delivery protocol, revision 2</span>
+    <span>Scroll back up to run the specimen again.</span>
+  </footer>
+</div>
+</main>
+
+<script src="vendor/anime.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
